@@ -94,15 +94,15 @@ def main():
             if status == "Run script":
                 scriptFile = response.json()['ScriptPath']
                 scriptName = response.json()['ScriptName']
-                wget.download(scriptFile, out='/tmp/script')
+                wget.download(scriptFile, out='/tmp/script.sh')
 
                 try:
-                    subprocess.Popen(["/usr/bin/bash", "/tmp/script"])
+                    subprocess.Popen(["/usr/bin/bash", "/tmp/script.sh"])
                     recentLogs(f"Running script: {scriptName}")
 
                 # Problems can happen. This records the errors to the logList
                 except subprocess.CalledProcessError as e:
-                        recentLogs(str(e))
+                    recentLogs(str(e))
                 recentLogs(scriptFile)
 
             elif status == "Reboot":
