@@ -92,6 +92,9 @@ def main():
             # to execute command script using flags included in scriptPath.
 
             if status == "Run Script":
+                # clear all files before we download more
+                clearFiles()
+
                 scriptFile = response.json()['ScriptPath']
                 scriptName = response.json()['ScriptName']
                 wget.download(scriptFile, out='/tmp/script.sh')
@@ -110,9 +113,6 @@ def main():
 
             elif status == "Do Nothing":
                 recentLogs("No command received")
-
-                # clear all files before we download more
-                clearFiles()
 
             # Main loop speed control
             sleep(30)
