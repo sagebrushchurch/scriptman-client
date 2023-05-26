@@ -126,5 +126,5 @@ def main():
             recentLogs("Caught an error...waiting and will try again")
             # This timeout is if server is down or has minor issue, small delay to let it sort out
             sleep(15)
-            
+
 main()
