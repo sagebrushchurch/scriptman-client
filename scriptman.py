@@ -74,7 +74,7 @@ def main():
         # Build data parameters for server post request
         deviceName = os.uname()[1]
         parameters = {}
-        parameters["name"] = deviceName
+        parameters["Name"] = deviceName
         parameters["Logs"] = logList
         parameters["IP"] = ipAddress
         parameters["Version"] = SCRIPT_CLIENT_VERSION
@@ -126,3 +126,5 @@ def main():
             recentLogs("Caught an error...waiting and will try again")
             # This timeout is if server is down or has minor issue, small delay to let it sort out
             sleep(15)
+            
+main()
