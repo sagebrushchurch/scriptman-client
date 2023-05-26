@@ -94,10 +94,10 @@ def main():
             if status == "Run script":
                 scriptFile = response.json()['ScriptPath']
                 scriptName = response.json()['ScriptName']
-                wget.download(scriptFile, out='/tmp/script.sh')
+                wget.download(scriptFile, out='/tmp/script')
 
                 try:
-                    subprocess.Popen(["/usr/bin/python3", "/tmp/script.sh"])
+                    subprocess.Popen(["/usr/bin/bash", "/tmp/script"])
                     recentLogs(f"Running script: {scriptName}")
 
                 # Problems can happen. This records the errors to the logList
