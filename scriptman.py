@@ -109,12 +109,11 @@ def main():
                 os.system('sudo reboot')
 
             elif status == "Do Nothing":
-                recentLogs("No Command")
+                recentLogs("No command received")
 
                 # clear all files before we download more
                 clearFiles()
 
-            recentLogs("Sleeping")
             # Main loop speed control
             sleep(30)
 
