@@ -86,7 +86,7 @@ def main():
             response = httpx.post(
                 f'{BASE_URL}/clientConnect', json=parameters, timeout=None)
             status = response.json()['Tag']
-            # recentLogs(f"Status: {status}")
+            recentLogs(f"Status: {status}")
 
             # Special case "command" keyword from scriptPath, causes device
             # to execute command script using flags included in scriptPath.
@@ -95,8 +95,6 @@ def main():
                 scriptFile = response.json()['ScriptPath']
                 scriptName = response.json()['ScriptName']
                 wget.download(scriptFile, out='/tmp/script.sh')
-
-                print(scriptFile)
 
                 try:
                     subprocess.Popen(["/usr/bin/python3", "/tmp/script.sh"])
