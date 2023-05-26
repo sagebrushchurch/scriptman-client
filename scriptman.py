@@ -91,7 +91,7 @@ def main():
             # Special case "command" keyword from scriptPath, causes device
             # to execute command script using flags included in scriptPath.
 
-            if status == "Run script":
+            if status == "Run Script":
                 scriptFile = response.json()['ScriptPath']
                 scriptName = response.json()['ScriptName']
                 wget.download(scriptFile, out='/tmp/script.sh')
