@@ -92,9 +92,11 @@ def main():
             # to execute command script using flags included in scriptPath.
 
             if status == "Run script":
-                commandFile = response.json()['ScriptPath']
+                scriptFile = response.json()['ScriptPath']
                 scriptName = response.json()['ScriptName']
-                wget.download(commandFile, out='/tmp/script.sh')
+                wget.download(scriptFile, out='/tmp/script.sh')
+
+                print(scriptFile)
 
                 try:
                     subprocess.Popen(["/usr/bin/python3", "/tmp/script.sh"])
@@ -103,7 +105,7 @@ def main():
                 # Problems can happen. This records the errors to the logList
                 except subprocess.CalledProcessError as e:
                         recentLogs(str(e))
-                recentLogs(commandFile)
+                recentLogs(scriptFile)
 
             elif status == "Reboot":
                 os.system('sudo reboot')
