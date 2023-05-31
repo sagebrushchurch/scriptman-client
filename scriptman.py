@@ -12,6 +12,9 @@ import httpx
 import wget
 import os
 
+# Global variable for failed attempts to connect to server
+timeSinceLastConnection = 0
+
 SCRIPT_CLIENT_VERSION = '0.1.0'
 BASE_URL = 'https://scriptman.sagebrush.dev/scriptman_be'
 # BASE_URL = 'https://scriptman.sagebrush.work/scriptman_be'
@@ -85,6 +88,10 @@ def main():
 
             response = httpx.post(
                 f'{BASE_URL}/clientConnect', json=parameters, timeout=None)
+
+            # Check for status of 2XX in httpx response
+            response.raise_for_status()
+
             status = response.json()['Tag']
             recentLogs(f"Status: {status}")
 
@@ -116,6 +123,13 @@ def main():
 
             # Main loop speed control
             sleep(30)
+
+        except httpx.HTTPError:
+            # At each failed response add 1 attempt to the tally
+            # After 48 failed attempts (4 hours), reboot the pi
+            timeSinceLastConnection += 1
+            if timeSinceLastConnection >= 48:
+                os.system('sudo reboot')
 
         except Exception as e:
             # General exception so that loop never crashes out, it will print it to the logs
