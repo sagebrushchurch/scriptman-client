@@ -15,7 +15,7 @@ import os
 # Global variable for failed attempts to connect to server
 timeSinceLastConnection = 0
 
-SCRIPT_CLIENT_VERSION = '0.1.0'
+SCRIPT_CLIENT_VERSION = '0.2.0'
 BASE_URL = 'https://scriptman.sagebrush.dev/scriptman_be'
 # BASE_URL = 'https://scriptman.sagebrush.work/scriptman_be'
 
