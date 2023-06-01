@@ -12,7 +12,7 @@ import httpx
 import wget
 import os
 
-SCRIPT_CLIENT_VERSION = '0.2.1'
+SCRIPT_CLIENT_VERSION = '0.2.2'
 BASE_URL = 'https://scriptman.sagebrush.dev/scriptman_be'
 # BASE_URL = 'https://scriptman.sagebrush.work/scriptman_be'
 
