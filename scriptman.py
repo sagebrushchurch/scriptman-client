@@ -12,9 +12,6 @@ import httpx
 import wget
 import os
 
-# Global variable for failed attempts to connect to server
-timeSinceLastConnection = 0
-
 SCRIPT_CLIENT_VERSION = '0.2.1'
 BASE_URL = 'https://scriptman.sagebrush.dev/scriptman_be'
 # BASE_URL = 'https://scriptman.sagebrush.work/scriptman_be'
@@ -53,7 +50,10 @@ def recentLogs(logMessage: str):
 def getIP():
 
     ipAddressInfo = subprocess.run(
-        ['hostname', '-I'], stdout=subprocess.PIPE, check=True)
+        ['hostname',
+         '-I'],
+         stdout=subprocess.PIPE,
+         check=True)
     ipAddress = ipAddressInfo.stdout.decode()
 
     return ipAddress
@@ -67,6 +67,8 @@ def main():
     clearFiles()
     loopDelayCounter = 0
     ipAddress = getIP()
+    # Global variable for failed attempts to connect to server
+    timeSinceLastConnection = 0
 
     while True:
         if loopDelayCounter == 5:
@@ -87,7 +89,9 @@ def main():
             # Might need to change to 5 seconds if going too long causes crash.
 
             response = httpx.post(
-                f'{BASE_URL}/clientConnect', json=parameters, timeout=None)
+                f'{BASE_URL}/clientConnect',
+                json=parameters,
+                timeout=None)
 
             # Check for status of 2XX in httpx response
             response.raise_for_status()
@@ -128,9 +132,9 @@ def main():
             # At each failed response add 1 attempt to the tally
             # After 48 failed attempts (4 hours), reboot the pi
             timeSinceLastConnection += 1
-            if timeSinceLastConnection >= 48:
+            if timeSinceLastConnection >= 100:
                 os.system('sudo reboot')
-
+            print(f"Unable to contact Scriptman. Current tally is {timeSinceLastConnection}")
         except Exception as e:
             # General exception so that loop never crashes out, it will print it to the logs
             recentLogs('type is: ' + e.__class__.__name__)
