@@ -135,6 +135,7 @@ def main():
             if timeSinceLastConnection >= 100:
                 os.system('sudo reboot')
             print(f"Unable to contact Scriptman. Current tally is {timeSinceLastConnection}")
+            sleep(30)
         except Exception as e:
             # General exception so that loop never crashes out, it will print it to the logs
             recentLogs('type is: ' + e.__class__.__name__)
