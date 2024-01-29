@@ -13,8 +13,12 @@ import wget
 import os
 
 SCRIPT_CLIENT_VERSION = '0.2.2'
-BASE_URL = 'https://scriptman.sagebrush.dev/scriptman_be'
-# BASE_URL = 'https://scriptman.sagebrush.work/scriptman_be'
+
+PI_NAME = os.uname()[1]
+if '-dev-' in PI_NAME.lower():
+    BASE_URL = 'https://scriptman.sagebrush.dev/scriptman_be'
+else:
+    BASE_URL = 'https://scriptman.sagebrush.work/scriptman_be'
 
 logList = []
 
