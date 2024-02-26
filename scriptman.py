@@ -114,6 +114,7 @@ def main():
                 scriptName = response.json()['ScriptName']
                 wget.download(scriptFile, out='/tmp/script.sh')
 
+                # subprocess.popen will allow the program to run the script in the background
                 try:
                     subprocess.Popen(["/usr/bin/bash", "/tmp/script.sh"])
                     recentLogs(f"Running script: {scriptName}")
