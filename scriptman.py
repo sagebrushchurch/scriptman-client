@@ -11,6 +11,7 @@ import platform
 import httpx
 import wget
 import os
+import glob
 
 SCRIPT_CLIENT_VERSION = '0.2.2'
 
@@ -27,9 +28,13 @@ operating_system = platform.system()
 def clearFiles():
     """clears all temp files, ensures nothing is re-used"""
 
+    oldScripts = glob.glob('/tmp/script.*')
+
     if operating_system == "Linux":
-        if os.path.exists('/tmp/script.sh'):
-            os.remove('/tmp/script.sh')
+        for path in oldScripts:
+            os.remove(path) 
+        # os.path.exists('/tmp/script.sh'):
+        #     os.remove('/tmp/script.sh')
 
 def recentLogs(logMessage: str):
     """
@@ -112,13 +117,22 @@ def main():
 
                 scriptFile = response.json()['ScriptPath']
                 scriptName = response.json()['ScriptName']
-                wget.download(scriptFile, out='/tmp/script.sh')
+
+                if scriptFile.endswith('.sh'):
+                    wget.download(scriptFile, out='/tmp/script.sh')
+                elif scriptFile.endswith('.py'):
+                    wget.download(scriptFile, out='/tmp/script.py')
 
                 # subprocess.popen will allow the program to run the script in the background
                 try:
-                    subprocess.Popen(["/usr/bin/bash", "/tmp/script.sh"])
-                    recentLogs(f"Running script: {scriptName}")
-
+                    if os.path.exists('/tmp/script.sh'):
+                        subprocess.Popen(["/usr/bin/bash", "/tmp/script.sh"])
+                        recentLogs(f"Running script: {scriptName}")
+                    elif os.path.exists('/tmp/script.py'):
+                        subprocess.Popen(["/usr/bin/python3", "/tmp/script.py"])
+                        recentLogs(f"Running script: {scriptName}")
+                    else:
+                        recentLogs("Unknown Script Type, please check file extension.")
                 # Problems can happen. This records the errors to the logList
                 except subprocess.CalledProcessError as e:
                     recentLogs(str(e))
