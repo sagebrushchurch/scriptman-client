@@ -13,7 +13,7 @@ import wget
 import os
 import glob
 
-SCRIPT_CLIENT_VERSION = '0.2.2'
+SCRIPT_CLIENT_VERSION = '0.3.0'
 
 PI_NAME = os.uname()[1]
 if '-dev-' in PI_NAME.lower():
@@ -32,9 +32,7 @@ def clearFiles():
 
     if operating_system == "Linux":
         for path in oldScripts:
-            os.remove(path) 
-        # os.path.exists('/tmp/script.sh'):
-        #     os.remove('/tmp/script.sh')
+            os.remove(path)
 
 def recentLogs(logMessage: str):
     """
@@ -44,7 +42,7 @@ def recentLogs(logMessage: str):
         logMessage (str): the log message
 
     Returns:
-        list: list of log messages
+        logList: list of log messages
     """
 
     if len(logList) > 50:
@@ -76,7 +74,6 @@ def main():
     clearFiles()
     loopDelayCounter = 0
     ipAddress = getIP()
-    # Global variable for failed attempts to connect to server
     timeSinceLastConnection = 0
 
     while True:
@@ -111,41 +108,64 @@ def main():
             # Special case "command" keyword from scriptPath, causes device
             # to execute command script using flags included in scriptPath.
 
-            if status == "Run Script":
-                # clear all files before we download more
-                clearFiles()
-
-                scriptFile = response.json()['ScriptPath']
-                scriptName = response.json()['ScriptName']
-
-                if scriptFile.endswith('.sh'):
-                    wget.download(scriptFile, out='/tmp/script.sh')
-                elif scriptFile.endswith('.py'):
-                    wget.download(scriptFile, out='/tmp/script.py')
-
-                # subprocess.popen will allow the program to run the script in the background
-                try:
-                    if os.path.exists('/tmp/script.sh'):
-                        subprocess.Popen(["/usr/bin/bash", "/tmp/script.sh"])
-                        recentLogs(f"Running script: {scriptName}")
-                    elif os.path.exists('/tmp/script.py'):
-                        subprocess.Popen(["/usr/bin/python3", "/tmp/script.py"])
-                        recentLogs(f"Running script: {scriptName}")
-                    else:
-                        recentLogs("Unknown Script Type, please check file extension.")
-                # Problems can happen. This records the errors to the logList
-                except subprocess.CalledProcessError as e:
-                    recentLogs(str(e))
-                recentLogs(scriptFile)
-
-            elif status == "Reboot":
-                os.system('sudo reboot')
-
-            elif status == "Do Nothing":
+            if status == "Do Nothing":
                 recentLogs("No command received")
+                sleep(30)
 
-            # Main loop speed control
-            sleep(30)
+            elif status is not "Do Nothing":
+
+                if status == "Run Script":
+                    # clear all files before we download more
+                    clearFiles()
+
+                    scriptFile = response.json()['ScriptPath']
+                    scriptName = response.json()['ScriptName']
+
+                    if scriptFile.endswith('.sh'):
+                        wget.download(scriptFile, out='/tmp/script.sh')
+                    elif scriptFile.endswith('.py'):
+                        wget.download(scriptFile, out='/tmp/script.py')
+
+                    # subprocess.popen will allow the program to run the script in the background
+                    # while subprocess.run will allow the program to output stdout to the logs
+                    try:
+                        if os.path.exists('/tmp/script.sh'):
+                            shell_run = subprocess.Popen(["/usr/bin/bash", "/tmp/script.sh"], 
+                                                         stdout=subprocess.PIPE, 
+                                                         stderr=subprocess.STDOUT, 
+                                                         text=True, 
+                                                         bufsize=1)
+                            for line in iter(shell_run.stdout.readline, ''):
+                                output = print(line, end='', flush=True)
+
+                            recentLogs(f"Running script: {scriptName}")
+                            recentLogs(output)
+
+                        elif os.path.exists('/tmp/script.py'):
+                            python_run = subprocess.Popen(["/usr/bin/python3", "/tmp/script.py"], 
+                                                         stdout=subprocess.PIPE, 
+                                                         stderr=subprocess.STDOUT, 
+                                                         text=True, 
+                                                         bufsize=1)
+                            for line in iter(python_run.stdout.readline, ''):
+                                print(line, end='', flush=True)
+
+                            recentLogs(f"Running script: {scriptName}")
+                            recentLogs(output)
+
+                        else:
+                            recentLogs("Unknown Script Type, please check file extension.")
+                    # Problems can happen. This records the errors to the logList
+                    except subprocess.CalledProcessError as process_error:
+                        recentLogs(str(process_error))
+                    except Exception as e:
+                        recentLogs(str(e))
+                        print_exc()
+                        sleep(5)
+                    recentLogs(scriptFile)
+
+                if status == "Reboot":
+                    os.system('sudo reboot')
 
         except httpx.HTTPError:
             # At each failed response add 1 attempt to the tally
@@ -160,7 +180,7 @@ def main():
             recentLogs('type is: ' + e.__class__.__name__)
             recentLogs(str(e))
             print_exc()
-            recentLogs("Caught an error...waiting and will try again")
+            recentLogs("Caught an error. Waiting and will try again")
             # This timeout is if server is down or has minor issue, small delay to let it sort out
             sleep(15)
 
