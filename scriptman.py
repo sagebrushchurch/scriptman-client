@@ -112,7 +112,7 @@ def main():
                 recentLogs("No command received")
                 sleep(30)
 
-            elif status is not "Do Nothing":
+            elif status != "Do Nothing":
 
                 if status == "Run Script":
                     # clear all files before we download more
@@ -148,7 +148,7 @@ def main():
                                                          text=True, 
                                                          bufsize=1)
                             for line in iter(python_run.stdout.readline, ''):
-                                print(line, end='', flush=True)
+                                output = print(line, end='', flush=True)
 
                             recentLogs(f"Running script: {scriptName}")
                             recentLogs(output)
