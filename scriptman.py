@@ -122,7 +122,8 @@ def main():
             response.raise_for_status()
 
             status = response.json()['Tag']
-            recentLogs(f"Status: {status}")
+            if not (status == "Do Nothing" and logList[-1]["log"]) == "Status: Do Nothing":
+                recentLogs(f"Status: {status}")
 
             # Special case "command" keyword from scriptPath, causes device
             # to execute command script using flags included in scriptPath.
