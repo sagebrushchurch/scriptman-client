@@ -8,6 +8,7 @@ from datetime import datetime
 from time import sleep
 import subprocess
 import platform
+import threading
 import httpx
 import wget
 import os
@@ -64,6 +65,24 @@ def getIP():
     ipAddress = ipAddressInfo.stdout.decode()
 
     return ipAddress
+
+def run_script(script_type, script_path):
+    def target():
+        nonlocal process
+        process = subprocess.Popen(
+            [script_type, script_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
+        )
+        for line in iter(process.stdout.readline, ''):
+            print(line, end='', flush=True)
+            recentLogs(line.strip())
+
+    process = None
+    thread = threading.Thread(target=target)
+    thread.start()
 
 def main():
     """
@@ -126,32 +145,14 @@ def main():
                     elif scriptFile.endswith('.py'):
                         wget.download(scriptFile, out='/tmp/script.py')
 
-                    # subprocess.popen will allow the program to run the script in the background
-                    # while subprocess.run will allow the program to output stdout to the logs
                     try:
                         if os.path.exists('/tmp/script.sh'):
-                            shell_run = subprocess.Popen(["/usr/bin/bash", "/tmp/script.sh"], 
-                                                         stdout=subprocess.PIPE, 
-                                                         stderr=subprocess.STDOUT, 
-                                                         text=True, 
-                                                         bufsize=1)
-                            for line in iter(shell_run.stdout.readline, ''):
-                                output = print(line, end='', flush=True)
-
                             recentLogs(f"Running script: {scriptName}")
-                            recentLogs(output)
+                            run_script(script_type='usr/bin/bash', script_path='/tmp/script.sh')
 
                         elif os.path.exists('/tmp/script.py'):
-                            python_run = subprocess.Popen(["/usr/bin/python3", "/tmp/script.py"], 
-                                                         stdout=subprocess.PIPE, 
-                                                         stderr=subprocess.STDOUT, 
-                                                         text=True, 
-                                                         bufsize=1)
-                            for line in iter(python_run.stdout.readline, ''):
-                                output = print(line, end='', flush=True)
-
                             recentLogs(f"Running script: {scriptName}")
-                            recentLogs(output)
+                            run_script(script_type='usr/bin/python3', script_path='/tmp/script.py')
 
                         else:
                             recentLogs("Unknown Script Type, please check file extension.")
