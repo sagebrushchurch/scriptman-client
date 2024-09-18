@@ -116,7 +116,7 @@ def main():
             response = httpx.post(
                 f'{BASE_URL}/clientConnect',
                 json=parameters,
-                timeout=None)
+                timeout=5)
 
             # Check for status of 2XX in httpx response
             response.raise_for_status()
