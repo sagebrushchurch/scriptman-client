@@ -14,7 +14,7 @@ import wget
 import os
 import glob
 
-SCRIPT_CLIENT_VERSION = '0.3.0'
+SCRIPT_CLIENT_VERSION = '0.4.0'
 
 PI_NAME = os.uname()[1]
 if '-dev-' in PI_NAME.lower():
@@ -90,10 +90,18 @@ def main():
     and running them when updated.
     """
 
+    recentLogs("Scriptman Client started")
+    recentLogs(f"Scriptman Client version: {SCRIPT_CLIENT_VERSION}")
+
+    # print("Started")
+
     clearFiles()
     loopDelayCounter = 0
     ipAddress = getIP()
     timeSinceLastConnection = 0
+    deviceName = os.uname()[1]
+    ssPath = f"/tmp/{deviceName}.png"
+    previous_status = None
 
     while True:
         if loopDelayCounter == 5:
@@ -102,7 +110,6 @@ def main():
         loopDelayCounter += 1
 
         # Build data parameters for server post request
-        deviceName = os.uname()[1]
         parameters = {}
         parameters["Name"] = deviceName
         parameters["Logs"] = logList
@@ -110,9 +117,7 @@ def main():
         parameters["Version"] = SCRIPT_CLIENT_VERSION
 
         try:
-            # Did timeout=None cuz in some cases the posts would time out.
-            # Might need to change to 5 seconds if going too long causes crash.
-
+            # Did timeout=5 seconds cuz going too long causes crash
             response = httpx.post(
                 f'{BASE_URL}/clientConnect',
                 json=parameters,
@@ -121,18 +126,38 @@ def main():
             # Check for status of 2XX in httpx response
             response.raise_for_status()
 
+            # print("Got connection to server")
+
             status = response.json()['Tag']
-            if not (status == "Do Nothing" and logList[-1]["log"]) == "Status: Do Nothing":
+            if status != previous_status:
                 recentLogs(f"Status: {status}")
 
             # Special case "command" keyword from scriptPath, causes device
             # to execute command script using flags included in scriptPath.
 
+            try:
+                if '-recording-' in deviceName.lower():
+                    subprocess.run(['ffmpeg', '-y', '-f', 'v4l2', '-i', '/dev/video0', '-vframes', '1', ssPath], capture_output=True, text=True, check=True)
+                    print("ffmpeg screenshot saved as " + ssPath)
+            except subprocess.CalledProcessError as e:
+                recentLogs(f"ffmpeg error: {str(e)}")
+            # Build data to upload to server
+            data = {'clientName': deviceName}
+            files = {'file': open(ssPath, 'rb')}
+            # print(f"Uploading screenshot for {deviceName} to server")
+            # timeout=None to avoid timeout issues with server
+            httpx.post(f'{BASE_URL}/uploadScreenshot',
+                    data=data,
+                    files=files,
+                    timeout=None)
+            # print("Screenshot upload complete")
+
             if status == "Do Nothing":
                 recentLogs("No command received")
-                sleep(30)
+                # print("No command received")
 
             elif status != "Do Nothing":
+                # print("Command received")
 
                 if status == "Run Script":
                     # clear all files before we download more
@@ -168,6 +193,9 @@ def main():
 
                 if status == "Reboot":
                     os.system('sudo reboot')
+
+            # Main Loop Speed Control
+            sleep(30)
 
         except httpx.HTTPError:
             # At each failed response add 1 attempt to the tally
