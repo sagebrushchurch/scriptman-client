@@ -14,7 +14,7 @@ import wget
 import os
 import glob
 
-SCRIPT_CLIENT_VERSION = '0.4.0'
+SCRIPT_CLIENT_VERSION = '0.4.1'
 
 PI_NAME = os.uname()[1]
 if '-dev-' in PI_NAME.lower():
