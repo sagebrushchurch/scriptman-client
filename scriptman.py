@@ -146,11 +146,12 @@ def main():
             files = {'file': open(ssPath, 'rb')}
             # print(f"Uploading screenshot for {deviceName} to server")
             # timeout=None to avoid timeout issues with server
-            httpx.post(f'{BASE_URL}/uploadScreenshot',
-                    data=data,
-                    files=files,
-                    timeout=None)
-            # print("Screenshot upload complete")
+            if os.path.exists(ssPath):
+                httpx.post(f'{BASE_URL}/uploadScreenshot',
+                        data=data,
+                        files=files,
+                        timeout=None)
+                # print("Screenshot upload complete")
 
             if status == "Do Nothing":
                 recentLogs("No command received")
