@@ -14,7 +14,7 @@ import wget
 import os
 import glob
 
-SCRIPT_CLIENT_VERSION = '0.4.0'
+SCRIPT_CLIENT_VERSION = '0.4.1'
 
 PI_NAME = os.uname()[1]
 if '-dev-' in PI_NAME.lower():
@@ -146,11 +146,15 @@ def main():
             files = {'file': open(ssPath, 'rb')}
             # print(f"Uploading screenshot for {deviceName} to server")
             # timeout=None to avoid timeout issues with server
-            httpx.post(f'{BASE_URL}/uploadScreenshot',
-                    data=data,
-                    files=files,
-                    timeout=None)
-            # print("Screenshot upload complete")
+
+            if ssPath.exists():
+                httpx.post(f'{BASE_URL}/uploadScreenshot',
+                        data=data,
+                        files=files,
+                        timeout=None)
+                # print("Screenshot upload complete")
+            else:
+                recentLogs("Screenshot file not found, screenshot upload skipped")
 
             if status == "Do Nothing":
                 recentLogs("No command received")
