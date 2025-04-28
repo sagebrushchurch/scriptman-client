@@ -141,12 +141,13 @@ def main():
                     print("ffmpeg screenshot saved as " + ssPath)
             except subprocess.CalledProcessError as e:
                 recentLogs(f"ffmpeg error: {str(e)}")
-            # Build data to upload to server
-            data = {'clientName': deviceName}
-            files = {'file': open(ssPath, 'rb')}
+
             # print(f"Uploading screenshot for {deviceName} to server")
             # timeout=None to avoid timeout issues with server
-            if os.path.exists(ssPath):
+            if os.path.exists(ssPath):            # Build data to upload to server
+                data = {'clientName': deviceName}
+                files = {'file': open(ssPath, 'rb')}
+
                 httpx.post(f'{BASE_URL}/uploadScreenshot',
                         data=data,
                         files=files,
