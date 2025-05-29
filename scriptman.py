@@ -103,6 +103,8 @@ def main():
     ssPath = f"/tmp/{deviceName}.png"
     previous_status = None
 
+    open(ssPath, 'w').close()  # Ensure screenshot file is empty
+
     while True:
         if loopDelayCounter == 5:
             ipAddress = getIP()
