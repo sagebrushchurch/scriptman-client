@@ -14,7 +14,7 @@ import wget
 import os
 import glob
 
-SCRIPT_CLIENT_VERSION = '0.4.1'
+SCRIPT_CLIENT_VERSION = '0.4.2'
 
 PI_NAME = os.uname()[1]
 if '-dev-' in PI_NAME.lower():
@@ -137,7 +137,7 @@ def main():
 
             try:
                 if '-recording-' in deviceName.lower():
-                    subprocess.run(['ffmpeg', '-y', '-f', 'v4l2', '-i', '/dev/video0', '-vframes', '1', ssPath], capture_output=True, text=True, check=True)
+                    subprocess.run(['ffmpeg', '-y', '-f', 'v4l2', '-timeout', '5000000', '-i', '/dev/video0', '-vframes', '1', ssPath], capture_output=True, text=True, check=True)
                     print("ffmpeg screenshot saved as " + ssPath)
             except subprocess.CalledProcessError as e:
                 recentLogs(f"ffmpeg error: {str(e)}")
