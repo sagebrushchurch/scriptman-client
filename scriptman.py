@@ -14,7 +14,7 @@ import wget
 import os
 import glob
 
-SCRIPT_CLIENT_VERSION = '0.4.2'
+SCRIPT_CLIENT_VERSION = '0.4.2-no-screenshot'
 
 PI_NAME = os.uname()[1]
 if '-dev-' in PI_NAME.lower():
@@ -137,26 +137,26 @@ def main():
             # Special case "command" keyword from scriptPath, causes device
             # to execute command script using flags included in scriptPath.
 
-            try:
-                if '-recording-' in deviceName.lower():
-                    subprocess.run(['ffmpeg', '-y', '-f', 'v4l2', '-timeout', '5000000', '-i', '/dev/video0', '-vframes', '1', ssPath], capture_output=True, text=True, check=True)
-                    print("ffmpeg screenshot saved as " + ssPath)
-            except subprocess.CalledProcessError as e:
-                recentLogs(f"ffmpeg error: {str(e)}")
+            # try:
+            #     if '-recording-' in deviceName.lower():
+            #         subprocess.run(['ffmpeg', '-y', '-f', 'v4l2', '-timeout', '5000000', '-i', '/dev/video0', '-vframes', '1', ssPath], capture_output=True, text=True, check=True)
+            #         print("ffmpeg screenshot saved as " + ssPath)
+            # except subprocess.CalledProcessError as e:
+            #     recentLogs(f"ffmpeg error: {str(e)}")
 
             # print(f"Uploading screenshot for {deviceName} to server")
             # timeout=None to avoid timeout issues with server
-            if os.path.exists(ssPath):            # Build data to upload to server
-                data = {'clientName': deviceName}
-                files = {'file': open(ssPath, 'rb')}
+            # if os.path.exists(ssPath):            # Build data to upload to server
+            #     data = {'clientName': deviceName}
+            #     files = {'file': open(ssPath, 'rb')}
 
-                httpx.post(f'{BASE_URL}/uploadScreenshot',
-                        data=data,
-                        files=files,
-                        timeout=None)
-                # print("Screenshot upload complete")
-            else:
-                recentLogs("Screenshot file not found, not uploading")
+            #     httpx.post(f'{BASE_URL}/uploadScreenshot',
+            #             data=data,
+            #             files=files,
+            #             timeout=None)
+            #     # print("Screenshot upload complete")
+            # else:
+            #     recentLogs("Screenshot file not found, not uploading")
 
             if status == "Do Nothing":
                 recentLogs("No command received")
